@@ -1,0 +1,14 @@
+{
+    "chat": {
+        "default_sys_msg": "You are just a friendly user in a chat.",
+        "max_msgs": 5,
+        "purge_days": 5
+    },
+    "prompt": {
+        "audio": {
+            "speed": 2,
+            "chunk_size": 50,
+            "crossfade": 25
+        }
+    }
+}

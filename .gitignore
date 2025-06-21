@@ -1,0 +1,14 @@
+__info__
+
+.vscode
+.venv
+.env
+**/__pycache__
+
+*.json
+!*.default.json
+whitelist.txt
+
+*.db
+
+gitremote.bat

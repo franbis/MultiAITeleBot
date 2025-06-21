@@ -1,0 +1,25 @@
+{
+    "chat": {
+        "model": "gpt-4o-mini",
+        "max_tokens": 100
+    },
+    "vision": {
+        "model": "gpt-4o-mini",
+        "detail": "low",
+        "max_tokens": 200
+    },
+    "image": {
+        "model": "dall-e-2",
+        "size": "256x256"
+    },
+    "stt": {
+        "model": "whisper-1"
+    },
+    "tts": {
+        "model": "tts-1",
+        "voice": "alloy"
+    },
+    "translation": {
+        "model": "gpt-4o-mini"
+    }
+}
