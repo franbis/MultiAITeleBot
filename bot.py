@@ -117,10 +117,15 @@ def send_help(msg):
 		"\n**NOTE**: You don't need to use /chat or /achat, simply reply with text or voice instead."
 
 		'\n\nYou can find the full list of commands '
-		'[here](https://github.com/franbis/TODO/commands.md)'
+		'[here](https://github.com/franbis/MultiAITeleBot/blob/main/commands.md)'
 		'.'
 	)
-	bot.send_message(msg.from_user.id, cmds, parse_mode='Markdown')
+	bot.send_message(
+		msg.from_user.id,
+		cmds,
+		parse_mode='Markdown',
+		disable_web_page_preview=True
+	)
 
 
 @bot.message_handler(commands=['status'])
