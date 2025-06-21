@@ -114,6 +114,8 @@ def send_help(msg):
 		'/tts		-	Make a voice message out of a textual one\n'
 		'/img		-	Generate an image\n'
 
+		"\n**NOTE**: You don't need to use /chat or /achat, simply reply with text or voice instead."
+
 		'\n\nYou can find the full list of commands '
 		'[here](https://github.com/franbis/TODO/commands.md)'
 		'.'
