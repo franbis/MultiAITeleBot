@@ -25,6 +25,10 @@ def reply_error(bot, msg, text):
 	bot.send_message(msg.chat.id, build_error_text(text), reply_to_message_id=msg.id)
 
 
-def print_exc(exc, msg):
+def print_exc(exc, bot, msg):
 	traceback.print_exc()
-	reply_error(msg, exc.body['message'])
+	err_msg = exc.body['message']
+	if exc.body['type'] == 'image_generation_user_error':
+		# OpenAI returns this error to avoid exposing the moderation reason.
+		err_msg = 'The server rejected the prompt'
+	reply_error(bot, msg, err_msg)

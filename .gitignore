@@ -1,6 +1,7 @@
 __info__
 
 .vscode
+.code-workspace
 .venv
 .env
 **/__pycache__

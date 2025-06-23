@@ -385,7 +385,7 @@ def bot_chat(msg, prompt):
 				ses.commit()
 			
 			except APIError as e:
-				print_exc(e, msg)
+				print_exc(e, bot, msg)
 
 
 @bot.message_handler(commands=['oldmsg'])
@@ -438,7 +438,7 @@ def bot_translate(msg, prompt):
 		)
 		
 	except APIError as e:
-		print_exc(e, msg)
+		print_exc(e, bot, msg)
 
 
 @bot.message_handler(commands=['stt'])
@@ -453,7 +453,7 @@ def bot_stt(msg, prompt):
 			bot.send_message(msg.chat.id, stt_resp.text, reply_to_message_id=msg.id)
 			
 		except APIError as e:
-			print_exc(e, msg)
+			print_exc(e, bot, msg)
 
 
 @bot.message_handler(commands=['tts'])
@@ -467,7 +467,7 @@ def bot_tts(msg, prompt):
 			bot.send_voice(msg.chat.id, tts_resp, reply_to_message_id=msg.id)
 			
 		except APIError as e:
-			print_exc(e, msg)
+			print_exc(e, bot, msg)
 
 
 @bot.message_handler(commands=['image', 'img', 'picture', 'pic'])
@@ -493,7 +493,7 @@ def bot_dalle(msg, prompt):
 			)
 			
 		except APIError as e:
-			print_exc(e, msg)
+			print_exc(e, bot, msg)
 
 
 # Non-command ops.
