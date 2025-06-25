@@ -4,10 +4,10 @@ __info__
 *.code-workspace
 .venv
 .env
-**/__pycache__
+__pycache__
 
-*.json
-!*.default.json
+/*.json
+!/*.default.json
 whitelist.txt
 
 *.db
