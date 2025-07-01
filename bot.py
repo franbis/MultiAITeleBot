@@ -196,7 +196,7 @@ def bot_config(msg, cmd, cmd_args):
 			elif op == 'set':
 				if parsed_cmd_args := parse_cmd_args(bot, msg, cmd_args, ('value', None, None)):
 					_, value = parsed_cmd_args
-					cfg.set(key_path, value)
+					cfg.set(key_path, value, match_type=True)
 					reply_info(bot, msg, f'"{key_path}" was set to: {cfg.get(key_path)}')
 
 		except KeyError:
