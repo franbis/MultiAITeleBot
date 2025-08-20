@@ -194,10 +194,12 @@ def bot_config(msg, cmd, cmd_args):
 				reply_info(bot, msg, f'"{key_path}" was reset to its default value ({cfg.get(key_path)}).')
 
 			elif op == 'set':
-				if parsed_cmd_args := parse_cmd_args(bot, msg, cmd_args, ('value', None, None)):
-					_, value = parsed_cmd_args
-					cfg.set(key_path, value, match_type=True)
-					reply_info(bot, msg, f'"{key_path}" was set to: {cfg.get(key_path)}')
+				if parse_cmd_args(bot, msg, cmd_args, ('value', None, None)):
+					try:
+						cfg.set(key_path, cmd_args, match_type=True)
+						reply_info(bot, msg, f'"{key_path}" was set to: {cfg.get(key_path)}')
+					except ValueError:
+						reply_error(bot, msg, f'The value you specified for "{key_path}" is invalid.')
 
 		except KeyError:
 			reply_error(bot, msg, f'"{key_path}" is not present in the "{cfg_type}" configuration.')
@@ -287,10 +289,9 @@ def bot_set_sys_msg(msg, cmd, cmd_args):
 			reply_info(bot, msg, f"The system message was reset to default: {default_sys_msg}")
 
 		elif op == 'set':
-			if parsed_cmd_args := parse_cmd_args(bot, msg, cmd_args, ('message', None, None)):
-				cmd_args, message = parsed_cmd_args
+			if parse_cmd_args(bot, msg, cmd_args, ('message', None, None)):
 				chat = get_or_create_chat(ses, msg.chat.id, config)
-				chat.sys_msg = message
+				chat.sys_msg = cmd_args
 				ses.commit()
 
 				reply_info(bot, msg, f"The system message was set to: {chat.sys_msg}")
