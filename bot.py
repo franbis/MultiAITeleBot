@@ -372,7 +372,7 @@ def bot_chat(msg, prompt):
 					telegram_resp_msg = bot.send_voice(msg.chat.id, ai.tts(gpt_resp_msg), reply_to_message_id=msg.id)
 				else:
 					# /gpt (text prompt).
-					telegram_resp_msg = bot.reply_to(msg, gpt_resp_msg)
+					telegram_resp_msg = bot.reply_to(msg, gpt_resp_msg, parse_mode='MarkdownV2')
 
 				# Add the AI's reply to the db and commit.
 				add_telegram_msg(

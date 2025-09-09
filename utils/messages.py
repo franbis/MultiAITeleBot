@@ -1,12 +1,21 @@
 import traceback
 
+import telegramify_markdown
+
 
 
 def process_text(text):
-	"""Replaces a text with a representation of emptiness.
-	Useful because Telegram will throw an error if the text in
-	a message is empty."""
-	return text if text else '[EMPTY]'
+	"""Format text to prevent the Telegram API from throwing errors
+	caused by unproperly formatted text."""
+	
+	# A message must not be empty, replace the text with a
+	# representation of emptiness.
+	text = text or '[EMPTY]'
+
+	# Markdown must be properly formatted.
+	text = telegramify_markdown.markdownify(text)
+
+	return text
 
 
 def build_info_text(text):
