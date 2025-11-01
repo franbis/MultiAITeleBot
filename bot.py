@@ -360,26 +360,26 @@ def bot_chat(msg, prompt):
 			model, max_tokens = ai.get_preferred_model_settings(chat.messages)
 
 			try:
-				gpt_resp_msg = ai.get_content(ai.chat(
+				resp_msg = ai.get_content(ai.chat(
 					chat.get_context(),
 					model=model,
 					max_tokens=max_tokens
 				))
-				gpt_resp_msg = process_text(gpt_resp_msg)
+				resp_msg = process_text(resp_msg)
 				
 				if msg.text.startswith('/a'):
-					# /agpt (audio prompt).
-					telegram_resp_msg = bot.send_voice(msg.chat.id, ai.tts(gpt_resp_msg), reply_to_message_id=msg.id)
+					# /allm (audio prompt).
+					telegram_resp_msg = bot.send_voice(msg.chat.id, ai.tts(resp_msg), reply_to_message_id=msg.id)
 				else:
-					# /gpt (text prompt).
-					telegram_resp_msg = bot.reply_to(msg, gpt_resp_msg, parse_mode='MarkdownV2')
+					# /llm (text prompt).
+					telegram_resp_msg = bot.reply_to(msg, resp_msg, parse_mode='MarkdownV2')
 
 				# Add the AI's reply to the db and commit.
 				add_telegram_msg(
 					ses,
 					telegram_resp_msg,
 					config,
-					gpt_resp_msg,
+					resp_msg,
 					MessageRole.assistant
 				)
 
@@ -522,7 +522,7 @@ def msg_event(msg):
 		if msg.voice:
 			# Simulate a command message.
 			msg.text = '/achat'
-			# Reply to itself since /agpt needs a quoted audio.
+			# Reply to itself since /allm needs a quoted audio.
 			msg.reply_to_message = msg
 			bot_chat(msg)
 
