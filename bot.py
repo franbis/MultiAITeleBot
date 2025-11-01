@@ -360,11 +360,11 @@ def bot_chat(msg, prompt):
 			model, max_tokens = ai.get_preferred_model_settings(chat.messages)
 
 			try:
-				gpt_resp_msg = ai.chat(
+				gpt_resp_msg = ai.get_content(ai.chat(
 					chat.get_context(),
 					model=model,
 					max_tokens=max_tokens
-				).choices[0].message.content
+				))
 				gpt_resp_msg = process_text(gpt_resp_msg)
 				
 				if msg.text.startswith('/a'):

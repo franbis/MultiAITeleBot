@@ -68,6 +68,12 @@ class AIManager(ABC):
 		return content
 
 
+	
+	def get_content(self, output_data, choice=0):
+		"""Extract the content of a output choice from a response."""
+		pass
+
+
 	@abstractmethod
 	def chat(self, messages, **options):
 		"""Call the LLM API and return the response."""
@@ -107,6 +113,10 @@ class OpenAIManager(AIManager):
 		super().__init__(*args, **kwargs)
 
 		self.client = OpenAI(api_key=api_key)
+
+
+	def get_content(self, output_data, choice=0):
+		return output_data.choices[choice].message.content
 
 
 	def chat(self, messages, **options):
