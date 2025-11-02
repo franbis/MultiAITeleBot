@@ -17,7 +17,7 @@ from models.chat import Base,  Message, MessageRole
 
 from utils.versioning import get_version_str
 from utils.prompt import extract_img_urls
-from utils.messages import print_exc, process_text, reply_error, reply_info
+from utils.messages import print_exc, process_text, reply_error, reply_info, reply_chat_msg, reply_voice_msg
 from utils.chat import get_chat, get_or_create_chat, add_telegram_msg, purge_old_chats
 
 from file_managers.config import ConfigurationManager
@@ -365,21 +365,20 @@ def bot_chat(msg, prompt):
 					model=model,
 					max_tokens=max_tokens
 				))
-				resp_msg = process_text(resp_msg)
 				
 				if msg.text.startswith('/a'):
 					# /allm (audio prompt).
-					telegram_resp_msg = bot.send_voice(msg.chat.id, ai.tts(resp_msg), reply_to_message_id=msg.id)
+					telegram_resp_msg = reply_voice_msg(bot, msg, resp_msg, ai)
 				else:
 					# /llm (text prompt).
-					telegram_resp_msg = bot.reply_to(msg, resp_msg, parse_mode='MarkdownV2')
+					telegram_resp_msg = reply_chat_msg(bot, msg, resp_msg)
 
 				# Add the AI's reply to the db and commit.
 				add_telegram_msg(
 					ses,
 					telegram_resp_msg,
 					config,
-					resp_msg,
+					process_text(resp_msg),
 					MessageRole.assistant
 				)
 

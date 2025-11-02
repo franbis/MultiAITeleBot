@@ -41,3 +41,12 @@ def print_exc(exc, bot, msg):
 		# OpenAI returns this error to avoid exposing the moderation reason.
 		err_msg = 'The server rejected the prompt'
 	reply_error(bot, msg, err_msg)
+
+
+def reply_chat_msg(bot, msg, text):
+	text = process_text(text)
+	return bot.reply_to(msg, text, parse_mode='MarkdownV2')
+
+
+def reply_voice_msg(bot, msg, text, ai):
+	return bot.send_voice(msg.chat.id, ai.tts(text), reply_to_message_id=msg.id)
