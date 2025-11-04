@@ -50,3 +50,8 @@ def reply_chat_msg(bot, msg, text):
 
 def reply_voice_msg(bot, msg, text, ai):
 	return bot.send_voice(msg.chat.id, ai.tts(text), reply_to_message_id=msg.id)
+
+
+def edit_chat_msg(bot, msg, text):
+	text = process_text(text)
+	return bot.edit_message_text(text, msg.chat.id, msg.id, parse_mode='MarkdownV2')
