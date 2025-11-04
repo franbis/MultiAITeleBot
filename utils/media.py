@@ -38,7 +38,7 @@ def speed_up_audio(audio_bytes, speed=2.0, chunk_size=50, crossfade=25):
 		sped_up_audio.export(new_audio_bytes_io, format="ogg")
 
 	else:
-		# We couldn't guess the format, leave the wave as-is.
+		# The format could not be guessed, leave the wave as-is.
 		new_audio_bytes_io = audio_io
 	
 	return new_audio_bytes_io.getvalue()
@@ -47,8 +47,8 @@ def speed_up_audio(audio_bytes, speed=2.0, chunk_size=50, crossfade=25):
 def create_image_url(img_bytes):
 	"""Build the data-URL for an image."""
 	
-	# We could use img_bytes directly to construct the data-URL but we want
-	# to strip the exif data for security reasons.
+	# img_bytes could be used directly to construct the data-URL but it's
+	# a good idea to first strip the exif data for security reasons.
 	img = Image.open(io.BytesIO(img_bytes))
 	new_img_bytesio = io.BytesIO()
 	

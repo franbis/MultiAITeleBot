@@ -10,8 +10,8 @@ Base = declarative_base()
 
 
 # There are other roles and 'system' was replaced by 'developer'
-# in the OpenAI API, tho we want to keep this flexible for any
-# AI that uses this system.
+# in the OpenAI API, tho it's better to keep this flexible for any
+# AI that uses the more common standard.
 class MessageRole(enum.Enum):
     system = 'system'
     assistant = 'assistant'
@@ -29,7 +29,7 @@ class Chat(Base):
     sys_msg = Column(String, nullable=True)
     last_msg_at = Column(DateTime(timezone=True), nullable=True)
     
-    # lazy='dynamic' so we can use queries.
+    # Set 'lazy' to 'dynamic' to enable the use of queries.
     messages = relationship(
         'Message',
         back_populates='chat',
@@ -75,8 +75,8 @@ class Chat(Base):
 class Message(Base):
     __tablename__ = 'messages'
 
-    # NOTE: We don't need a timestamp, Telegram gives incremental
-    #       ids to messages and we only care about the order.
+    # NOTE: There is no need for a timestamp, Telegram gives incremental
+    #       ids to messages and all is needed here is their order.
 
     # Telegram message id.
     id = Column(BigInteger, primary_key=True)

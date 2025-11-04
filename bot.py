@@ -35,8 +35,9 @@ args = parser.parse_args()
 # Load the db models.
 engine = create_engine(os.environ['DATABASE_URL'], echo=args.verbose)
 
-# SQLite ignores foreign keys. Enable it cause we need referential
-# integrity to avoid leaving orphan messages when deleting chats.
+# SQLite ignores foreign keys. Enable it since referential
+# integrity is needed to avoid leaving orphan messages when deleting
+# chats.
 @event.listens_for(Engine, 'connect')
 def enable_sqlite_foreign_keys(dbapi_connection, connection_record):
 	if 'sqlite' in str(dbapi_connection.__class__):
@@ -348,7 +349,8 @@ def bot_chat(msg, prompt):
 		content = ai.build_msg_content([text], img_urls)
 
 		with Session() as ses:
-			# Don't commit until we have the certainty that the AI replied.
+			# Don't commit until there is absolute certainty that the AI
+			# replied.
 			add_telegram_msg(
 				ses,
 				msg,
@@ -499,7 +501,7 @@ def bot_dalle(msg, prompt):
 # Non-command ops.
 # The events below are for messages either received from a private
 # chat or that are replies to a bot's message.
-# We redirect them to simulate a command message.
+# Redirect them to simulate a command message.
 
 
 @bot.message_handler(content_types=['text'])

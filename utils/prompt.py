@@ -23,8 +23,8 @@ def prepare_audio(bot, msg_audio, config):
 	)
 	
 	# NOTE: OpenAI infers the file format by reading the filename extension.
-	#		So we use OGG as that's the format audio files are compressed
-	#		into when recording within Telegram.
+	#		So use OGG as that's the format audio files are compressed into
+	#		when recording within Telegram.
 	return '.ogg', file_bytes
 
 
@@ -97,8 +97,8 @@ def extract_img_urls(bot, msg, text):
 
 	NOTE: There can only be one medium attachment per Telegram message, as media
 			are actually sent through multiple messages and linked together by the
-			media_group_id. In order to download media from a media group we'd need
-			to write a system that catches the media as they get sent.
+			media_group_id. In order to download media from a media group a system
+			that catches the media as they get sent is needed.
 			See https://github.com/python-telegram-bot/python-telegram-bot/wiki/Frequently-requested-design-patterns#how-do-i-deal-with-a-media-group
 			for further information.
 
