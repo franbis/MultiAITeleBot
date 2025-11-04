@@ -66,16 +66,39 @@ class AIManager(ABC):
 			})
 			
 		return content
+	
+
+	def get_stream_chunks(self, resp):
+		"""Yield chunks from a streamed reply."""
+		for chunk in resp:
+			if chunk:
+				yield chunk
+
+
+	def get_choice_stream_chunks(self, resp, choice=0):
+		"""Yield chunks for a specific choice from a streamed reply."""
+
+		for i, chunk in enumerate(self.get_stream_chunks(resp)):
+			if i == 0:
+				# The first chunk is always empty.
+				continue
+
+			c = chunk.choices[choice]
+			if c.finish_reason == 'stop':
+				return
+
+			yield chunk
 
 
 	
 	def get_content(self, output_data, choice=0):
-		"""Extract the content of a output choice from a response."""
+		"""Extract the content of a output choice from either a
+		response or a stream chunk"""
 		pass
 
 
 	@abstractmethod
-	def chat(self, messages, **options):
+	def chat(self, messages, stream=False, **options):
 		"""Call the LLM API and return the response."""
 		pass
 
@@ -116,12 +139,18 @@ class OpenAIManager(AIManager):
 
 
 	def get_content(self, output_data, choice=0):
-		return output_data.choices[choice].message.content
+		c = output_data.choices[choice]
+		if output_data.object == 'chat.completion':
+			return c.message.content
+		elif output_data.object == 'chat.completion.chunk':
+			return c.delta.content
 
 
-	def chat(self, messages, **options):
+	def chat(self, messages, stream=False, **options):
 		return self.client.chat.completions.create(
 			messages=messages,
+			temperature=0,
+			stream=stream,
 			**(self.options.get('chat') | options)
 		)
 		
