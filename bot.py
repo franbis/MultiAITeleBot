@@ -283,6 +283,7 @@ def bot_set_sys_msg(msg, cmd, cmd_args):
 				reply_info(bot, msg, f"This chat hasn't been registered yet.")
 
 		elif op == 'reset':
+			config.reset('chat.default_sys_msg')
 			default_sys_msg = config.get('chat.default_sys_msg')
 			if chat:
 				chat.sys_msg = default_sys_msg
