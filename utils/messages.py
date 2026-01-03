@@ -27,11 +27,21 @@ def build_error_text(text):
 
 
 def reply_info(bot, msg, text):
-	bot.send_message(msg.chat.id, build_info_text(text), reply_to_message_id=msg.id)
+	bot.send_message(
+		msg.chat.id,
+		build_info_text(text),
+		message_thread_id=msg.message_thread_id,
+		reply_to_message_id=msg.id
+	)
 	
 	
 def reply_error(bot, msg, text):
-	bot.send_message(msg.chat.id, build_error_text(text), reply_to_message_id=msg.id)
+	bot.send_message(
+		msg.chat.id,
+		build_error_text(text),
+		message_thread_id=msg.message_thread_id,
+		reply_to_message_id=msg.id
+	)
 
 
 def print_exc(exc, bot, msg):
@@ -45,11 +55,21 @@ def print_exc(exc, bot, msg):
 
 def reply_chat_msg(bot, msg, text):
 	text = process_text(text)
-	return bot.reply_to(msg, text, parse_mode='MarkdownV2')
+	return bot.reply_to(
+		msg,
+		text,
+		message_thread_id=msg.message_thread_id,
+		parse_mode='MarkdownV2'
+	)
 
 
 def reply_voice_msg(bot, msg, text, ai):
-	return bot.send_voice(msg.chat.id, ai.tts(text), reply_to_message_id=msg.id)
+	return bot.send_voice(
+		msg.chat.id,
+		ai.tts(text),
+		message_thread_id=msg.message_thread_id,
+		reply_to_message_id=msg.id
+	)
 
 
 def edit_chat_msg(bot, msg, text):

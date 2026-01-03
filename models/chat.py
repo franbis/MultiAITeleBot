@@ -1,6 +1,6 @@
 import enum
 
-from sqlalchemy import Enum, Column, BigInteger, String, DateTime, JSON, ForeignKey
+from sqlalchemy import Enum, Column, BigInteger, ForeignKeyConstraint, String, DateTime, JSON, text
 from sqlalchemy.orm import declarative_base
 from sqlalchemy.orm import relationship
 
@@ -24,6 +24,11 @@ class Chat(Base):
 
     # Telegram chat id.
     id = Column(BigInteger, primary_key=True)
+    # Telegram thread id. On Telegram it's a positive integer
+    # or None. Use zero instead of None to keep it simple and let
+    # it be used as primary key.
+    thread_id = Column(BigInteger, primary_key=True, server_default=text("0"))
+
     # Although Message with 'role' set to 'system' could be used, use
     # a string for simplicity.
     sys_msg = Column(String, nullable=True)
@@ -36,6 +41,11 @@ class Chat(Base):
         passive_deletes=True,
         lazy='dynamic'
     )
+
+
+    def get_tg_thread_id(self):
+        """Return the thread id for this chat compatible with the Telegram API."""
+        return self.thread_id or None
 
 
     def get_context(self, max_items=None):
@@ -85,5 +95,16 @@ class Message(Base):
     role = Column(msg_role_enum, nullable=False)
     content = Column(JSON)
 
-    chat_id = Column(BigInteger, ForeignKey('chats.id', ondelete='CASCADE'))
-    chat = relationship('Chat', back_populates='messages')
+    chat_id = Column(BigInteger, nullable=False)
+    thread_id = Column(BigInteger, nullable=False, server_default=text("0"))
+
+    chat = relationship("Chat", back_populates="messages")
+
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["chat_id", "thread_id"],
+            ["chats.id", "chats.thread_id"],
+            name='fk_messages_chat_thread',
+            ondelete="CASCADE",
+        ),
+    )

@@ -85,7 +85,12 @@ def bot_start(msg, cmd, cmd_args):
 			f'[here](https://t.me/{bot.get_me().username}?start=commands)'
 			' or use /help to get a list of user commands in a private chat.'
 		)
-		bot.send_message(msg.chat.id, help_text, parse_mode='Markdown')
+		bot.send_message(
+			msg.chat.id,
+			help_text,
+			message_thread_id=msg.message_thread_id,
+			parse_mode='Markdown'
+		)
 
 	elif cmd_args == 'commands':
 		msg.text = '/help'
@@ -124,6 +129,7 @@ def send_help(msg):
 	bot.send_message(
 		msg.from_user.id,
 		cmds,
+		message_thread_id=msg.message_thread_id,
 		parse_mode='Markdown',
 		disable_web_page_preview=True
 	)
@@ -133,7 +139,11 @@ def send_help(msg):
 @wlisted_only(wlist)
 def bot_status(msg):
 	"""Show the bot's status."""
-	bot.send_message(msg.chat.id, 'ONLINE')
+	bot.send_message(
+		msg.chat.id,
+		'ONLINE',
+		message_thread_id=msg.message_thread_id,
+	)
 
 
 @bot.message_handler(commands=['chatinfo'])
@@ -175,6 +185,7 @@ def bot_config(msg, cmd, cmd_args):
 		bot.send_message(
 			msg.chat.id,
 			f'```json\n{cfg.to_json(indent=4, sort_keys=True)}\n```',
+			message_thread_id=msg.message_thread_id,
 			parse_mode='Markdown'
 		)
 		return
@@ -229,6 +240,7 @@ def bot_wlist(msg, cmd, cmd_args):
 		bot.send_message(
 			msg.chat.id,
 			f"```\n{list_str}\n```",
+			message_thread_id=msg.message_thread_id,
 			parse_mode='Markdown'
 		)
 		return
@@ -274,7 +286,7 @@ def bot_set_sys_msg(msg, cmd, cmd_args):
 	cmd_args, op = parsed_cmd_args
 
 	with Session() as ses:
-		chat = get_chat(ses, msg.chat.id)
+		chat = get_chat(ses, msg.chat.id, thread_id=msg.message_thread_id)
 
 		if op == 'show':
 			if chat:
@@ -292,7 +304,7 @@ def bot_set_sys_msg(msg, cmd, cmd_args):
 
 		elif op == 'set':
 			if parse_cmd_args(bot, msg, cmd_args, ('message', None, None)):
-				chat = get_or_create_chat(ses, msg.chat.id, config)
+				chat = get_or_create_chat(ses, msg.chat.id, config, thread_id=msg.message_thread_id)
 				chat.sys_msg = cmd_args
 				ses.commit()
 
@@ -316,7 +328,7 @@ def bot_cansee(msg):
 
 	has_visual_content = False
 	with Session() as ses:
-		if chat := get_chat(ses, msg.chat.id):
+		if chat := get_chat(ses, msg.chat.id, thread_id=msg.message_thread_id):
 			has_visual_content = ai.check_for_visual_content(chat.messages)
 	
 	if has_visual_content:
@@ -331,7 +343,7 @@ def bot_forget(msg):
 	"""Erase the bot's memory for this chat."""
 
 	with Session() as ses:
-		if chat := get_chat(ses, msg.chat.id):
+		if chat := get_chat(ses, msg.chat.id, thread_id=msg.message_thread_id):
 			chat.erase()
 			ses.commit()
 
@@ -359,7 +371,7 @@ def bot_chat(msg, prompt):
 				content=content,
 				role=MessageRole.user
 			)
-			chat = get_or_create_chat(ses, msg.chat.id, config)
+			chat = get_or_create_chat(ses, msg.chat.id, config, thread_id=msg.message_thread_id)
 			model, max_tokens = ai.get_preferred_model_settings(chat.messages)
 
 			try:
@@ -400,7 +412,7 @@ def bot_oldmsg(msg):
 	# Get the oldest message.
 	oldest_msg = None
 	with Session() as ses:
-		if chat := get_chat(ses, msg.chat.id):
+		if chat := get_chat(ses, msg.chat.id, thread_id=msg.message_thread_id):
 			oldest_msg = chat.messages.order_by(Message.id.asc()).first()
 
 	# Show the oldest message.
@@ -408,10 +420,15 @@ def bot_oldmsg(msg):
 		bot.send_message(
 			msg.chat.id,
 			'☝ This is the oldest message the bot has access to',
-			reply_to_message_id=oldest_msg.id
+			reply_to_message_id=oldest_msg.id,
+			message_thread_id=msg.message_thread_id
 		)
 	else:
-		bot.reply_to(msg, 'Could not find any message on this chat.')
+		bot.reply_to(
+			msg,
+			'Could not find any message on this chat.',
+			message_thread_id=msg.message_thread_id
+		)
 
 
 # Other AI ops.
@@ -437,7 +454,8 @@ def bot_translate(msg, prompt):
 		bot.send_message(
 			msg.chat.id,
 			f'[{trans.src_lang}->{trans.dst_lang}] {trans.translated_text}',
-			reply_to_message_id=msg.reply_to_message.id
+			reply_to_message_id=msg.reply_to_message.id,
+			message_thread_id=msg.message_thread_id
 		)
 		
 	except APIError as e:
@@ -453,7 +471,12 @@ def bot_stt(msg, prompt):
 	if prompt:
 		try:
 			stt_resp = ai.stt(prompt)
-			bot.send_message(msg.chat.id, stt_resp.text, reply_to_message_id=msg.id)
+			bot.send_message(
+				msg.chat.id,
+				stt_resp.text,
+				reply_to_message_id=msg.id,
+				message_thread_id=msg.message_thread_id
+			)
 			
 		except APIError as e:
 			print_exc(e, bot, msg)
@@ -467,7 +490,12 @@ def bot_tts(msg, prompt):
 	if prompt:
 		try:
 			tts_resp = ai.tts(prompt)
-			bot.send_voice(msg.chat.id, tts_resp, reply_to_message_id=msg.id)
+			bot.send_voice(
+				msg.chat.id,
+				tts_resp,
+				reply_to_message_id=msg.id,
+				message_thread_id=msg.message_thread_id
+			)
 			
 		except APIError as e:
 			print_exc(e, bot, msg)
@@ -492,7 +520,8 @@ def bot_dalle(msg, prompt):
 				#images_response.data[0].url,
 				img_data,
 				caption=prompt,
-				reply_to_message_id=msg.id
+				reply_to_message_id=msg.id,
+				message_thread_id=msg.message_thread_id
 			)
 			
 		except APIError as e:
@@ -560,7 +589,7 @@ def handle_my_chat_member(msg):
 		# The bot left the group, delete the chat and its messages
 		# from the database.
 		with Session() as ses:
-			if chat := get_chat(ses, msg.chat.id):
+			if chat := get_chat(ses, msg.chat.id, thread_id=msg.message_thread_id):
 				ses.delete(chat)
 				ses.commit()
 		

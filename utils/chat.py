@@ -1,4 +1,6 @@
 from datetime import datetime, timedelta, timezone
+import functools
+import inspect
 
 from sqlalchemy import delete
 
@@ -6,7 +8,27 @@ from models.chat import MessageRole, Chat, Message
 
 
 
-def get_chat(ses, id):
+def use_non_none_thread_id(fn):
+    """
+    Decorator that sets the 'thread_id' function's argument
+    to 0 if set to None.
+    """
+
+    sig = inspect.signature(fn)
+
+    @functools.wraps(fn)
+    def wrapper(*args, **kwargs):
+        arg_name = 'thread_id'
+        bound = sig.bind_partial(*args, **kwargs)
+        if bound.arguments.get(arg_name) == None:
+            bound.arguments[arg_name] = 0
+        return fn(*bound.args, **bound.kwargs)
+
+    return wrapper
+
+
+@use_non_none_thread_id
+def get_chat(ses, id, thread_id=None):
     """
     Find a chat by id and return it.
     
@@ -14,10 +36,11 @@ def get_chat(ses, id):
         ses:            Database session.
         id:             Chat's id.
     """
-    return ses.get(Chat, id)
+    return ses.get(Chat, (id, thread_id))
 
 
-def get_or_create_chat(ses, id, config, *args, **kwargs):
+@use_non_none_thread_id
+def get_or_create_chat(ses, id, config, thread_id=None, *args, **kwargs):
     """
     Find a chat by id and return it, create it if nonexistent.
     
@@ -28,9 +51,10 @@ def get_or_create_chat(ses, id, config, *args, **kwargs):
     """
 
     chat = None
-    if not (chat := ses.get(Chat, id)):
+    if not (chat := ses.get(Chat, (id, thread_id))):
         chat = Chat(
             id=id,
+            thread_id=thread_id,
             sys_msg=config.get('chat.default_sys_msg'),
             *args,
             **kwargs
@@ -40,7 +64,8 @@ def get_or_create_chat(ses, id, config, *args, **kwargs):
     return chat
 
 
-def add_msg(ses, id, user_name, chat_id, config, content, role=MessageRole.user):
+@use_non_none_thread_id
+def add_msg(ses, id, user_name, chat_id, config, content, thread_id=None, role=MessageRole.user):
     """
     Create and add a message to a chat.
     
@@ -53,7 +78,7 @@ def add_msg(ses, id, user_name, chat_id, config, content, role=MessageRole.user)
         role:           Message type.
     """
 
-    chat = get_or_create_chat(ses, chat_id, config)
+    chat = get_or_create_chat(ses, chat_id, config, thread_id=thread_id)
     chat.last_msg_at = datetime.now(timezone.utc)
 
     msg = Message(
@@ -86,6 +111,7 @@ def add_telegram_msg(ses, msg, config, content, role=MessageRole.user):
         id=msg.id,
         user_name=msg.from_user.username,
         chat_id=msg.chat.id,
+        thread_id=msg.message_thread_id,
         config=config,
         content=content,
         role=role
