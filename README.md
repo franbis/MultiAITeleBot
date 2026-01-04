@@ -1,6 +1,6 @@
 # MultiAITeleBot
 
-A Telegram bot that lets you use different AI models.
+A Telegram bot that lets you interact with different AI models.
 
 
 ## Features
