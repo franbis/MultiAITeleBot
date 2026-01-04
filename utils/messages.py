@@ -2,6 +2,8 @@ import traceback
 
 import telegramify_markdown
 
+from telebot import apihelper
+
 
 
 def process_text(text):
@@ -75,3 +77,32 @@ def reply_voice_msg(bot, msg, text, ai):
 def edit_chat_msg(bot, msg, text):
 	text = process_text(text)
 	return bot.edit_message_text(text, msg.chat.id, msg.id, parse_mode='MarkdownV2')
+
+
+def reply_chat_msg_stream(bot, msg, chunks):
+	full_text = ''
+	for chunk in chunks:
+		full_text += chunk
+		apihelper._make_request(
+			bot.token,
+			'sendMessageDraft',
+			method='post',
+			params={
+				'chat_id': msg.chat.id,
+				'message_thread_id': msg.message_thread_id,
+				'draft_id': msg.id,
+				'text': process_text(full_text),
+				'parse_mode': 'MarkdownV2',
+				# Drafts do not support replies.
+				# 'reply_parameters': {
+				# 	'message_id': msg.id,
+				# 	'chat_id': msg.chat.id
+				# }
+			}
+		)
+	return bot.reply_to(
+		msg,
+		process_text(full_text),
+		message_thread_id=msg.message_thread_id,
+		parse_mode='MarkdownV2'
+	)
