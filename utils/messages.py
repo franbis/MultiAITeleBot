@@ -3,6 +3,7 @@ import traceback
 import telegramify_markdown
 
 from telebot import apihelper
+from telebot.apihelper import ApiTelegramException
 
 
 
@@ -81,25 +82,34 @@ def edit_chat_msg(bot, msg, text):
 
 def reply_chat_msg_stream(bot, msg, chunks):
 	full_text = ''
-	for chunk in chunks:
-		full_text += chunk
-		apihelper._make_request(
-			bot.token,
-			'sendMessageDraft',
-			method='post',
-			params={
-				'chat_id': msg.chat.id,
-				'message_thread_id': msg.message_thread_id,
-				'draft_id': msg.id,
-				'text': process_text(full_text),
-				'parse_mode': 'MarkdownV2',
-				# Drafts do not support replies.
-				# 'reply_parameters': {
-				# 	'message_id': msg.id,
-				# 	'chat_id': msg.chat.id
-				# }
-			}
-		)
+	try:
+		for chunk in chunks:
+			full_text += chunk
+			apihelper._make_request(
+				bot.token,
+				'sendMessageDraft',
+				method='post',
+				params={
+					'chat_id': msg.chat.id,
+					'message_thread_id': msg.message_thread_id,
+					'draft_id': msg.id,
+					'text': process_text(full_text),
+					'parse_mode': 'MarkdownV2',
+					# Drafts do not support replies.
+					# 'reply_parameters': {
+					# 	'message_id': msg.id,
+					# 	'chat_id': msg.chat.id
+					# }
+				}
+			)
+	except ApiTelegramException as e:
+		if e.error_code == 429:
+			# A 'Too many requests' error was received, it's not
+			# worth waiting 4 seconds (suggested by the Telegram API)
+			# before retrying. So ignore it, send the text that was
+			# built till now and tell the user what happened.
+			full_text += '\n\n' + build_error_text('The "Too many requests" error was received from the Telegram API.')
+
 	return bot.reply_to(
 		msg,
 		process_text(full_text),
