@@ -17,7 +17,7 @@ from models.chat import Base,  Message, MessageRole
 
 from utils.versioning import get_version_str
 from utils.prompt import extract_img_urls
-from utils.messages import edit_chat_msg, print_exc, process_text, reply_error, reply_info, reply_chat_msg, reply_voice_msg
+from utils.messages import edit_chat_msg, print_exc, process_text, reply_chat_msg_stream, reply_error, reply_info, reply_chat_msg, reply_voice_msg
 from utils.chat import get_chat, get_or_create_chat, add_telegram_msg, purge_old_chats
 
 from file_managers.config import ConfigurationManager
@@ -353,8 +353,8 @@ def bot_chat(msg, prompt):
 			return reply_chat_msg(bot, msg, text)
 		
 	
-	def stream_text(msg, content_chunk):
-		return edit_chat_msg(bot, msg, content_chunk)
+	def reply_stream(msg, chunks):
+		return reply_chat_msg_stream(bot, msg, chunks)
 		
 
 	if prompt:
@@ -386,22 +386,11 @@ def bot_chat(msg, prompt):
 
 				resp_msg_content = ''
 				if should_stream:
-					telegram_resp_msg = None
-					for chunk in ai.get_choice_stream_chunks(resp):
-						# TODO - Stream each chunk using the upcoming Telegram
-						#			response streaming feature announced here:
-						#			https://telegram.org/blog/comments-in-video-chats-threads-for-bots#threads-and-streaming-responses-for-ai-bots
-						#			The documentation for that feature will
-						#			be published here:
-						#			https://core.telegram.org/bots/api
-						resp_msg_content += ai.get_content(chunk)
-						if not telegram_resp_msg:
-							telegram_resp_msg = reply(resp_msg_content)
-						else:
-							# TODO - Pass the text chunk rather than the whole text (Assuming
-							#			the Telegram stream feature will automatically append
-							#			the chunk to the pre-existing text).
-							telegram_resp_msg = stream_text(telegram_resp_msg, resp_msg_content)
+					telegram_resp_msg = reply_stream(msg, map(
+						ai.get_content,
+						ai.get_choice_stream_chunks(resp)
+					))
+					resp_msg_content = telegram_resp_msg.text
 				else:
 					resp_msg_content = ai.get_content(resp)
 					telegram_resp_msg = reply(resp_msg_content)
