@@ -69,4 +69,4 @@ Although multiple AI platforms can be implemented through the `AIManager` class,
 
 ## Response streaming
 
-Telegram added support for response streaming for textual messages on *2026-12-31*. You can try it out by setting `stream` to `true` in the bot configuration file (`config.json`) tho, the feature provided by the API is still experimental, the stream is slow and the "Too many requests" error is hit regularly just like when using the `editMessageText` endpoint.
+Telegram added support for response streaming for textual messages on *2026-12-31*. You can try it out by setting `stream` to `true` in the bot configuration file (`config.json`) tho, the feature provided by the API is still experimental, the stream is slow and the "Too many requests" error is hit regularly when using the `sendMessageDraft` endpoint just like with the `editMessageText` one.
