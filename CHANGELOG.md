@@ -2,6 +2,18 @@
 
 <br>
 
+### 3.1.0 (2026-01-04)
+
+* Add support for textual response streaming
+
+### 3.0.0 (2026-01-04)
+
+* Add support for chat threads
+
+### 2.1.0 (2025-09-09)
+
+* Use Markdown for chat messages
+
 ### 2.0.0 (2025-06-21)
 
 * Major codebase refactoring
