@@ -82,7 +82,7 @@ class ConfigurationManager:
                             original value's type.
         """
         d, k = self._get_nested_dict(self.config, key_path, sep=sep)
-        d[k] = type(d[k])(value) if match_type else value
+        d[k] = type(d[k])(json.loads(value)) if match_type else value
         self._save_config()
 
 

@@ -2,6 +2,10 @@
 
 <br>
 
+### 3.2.0 (2026-01-04)
+
+* Fix boolean values not being set correctly when editing a configuration
+
 ### 3.1.1 (2026-01-04)
 
 * Disable textual response streaming for non-private chats as Telegram doesn't allow it

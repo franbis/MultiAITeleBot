@@ -1,3 +1,4 @@
+from json import JSONDecodeError
 import os
 from base64 import b64decode
 
@@ -210,7 +211,7 @@ def bot_config(msg, cmd, cmd_args):
 					try:
 						cfg.set(key_path, cmd_args, match_type=True)
 						reply_info(bot, msg, f'"{key_path}" was set to: {cfg.get(key_path)}')
-					except ValueError:
+					except (ValueError, JSONDecodeError):
 						reply_error(bot, msg, f'The value you specified for "{key_path}" is invalid.')
 
 		except KeyError:
