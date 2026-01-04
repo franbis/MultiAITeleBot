@@ -65,3 +65,8 @@ You can find the full list of commands [here](/commands.md).
 ## Supported AI platforms
 
 Although multiple AI platforms can be implemented through the `AIManager` class, currently only the `OpenAI` platform is implemented.
+
+
+## Response streaming
+
+Telegram added support for response streaming for textual messages on *2026-12-31*. You can try it out by setting `stream` to `true` in the bot configuration file (`config.json`) tho, the feature provided by the API is still experimental, the stream is slow and the "Too many requests" error is hit regularly just like when using the `editMessageText` endpoint.
