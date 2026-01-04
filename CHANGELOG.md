@@ -2,6 +2,10 @@
 
 <br>
 
+### 3.1.1 (2026-01-04)
+
+* Disable textual response streaming for non-private chats as Telegram doesn't allow it
+
 ### 3.1.0 (2026-01-04)
 
 * Add support for textual response streaming

@@ -388,7 +388,13 @@ def bot_chat(msg, prompt):
 			model, max_tokens = ai.get_preferred_model_settings(chat.messages)
 
 			try:
-				should_stream = config.get('chat.stream') and not msg.text.startswith('/a')
+				should_stream =\
+					config.get('chat.stream')\
+					and not (\
+						msg.text.startswith('/a')\
+						# Telegram allows streaming in private chats only.
+						or msg.chat.type != 'private'\
+					)
 
 				resp = ai.chat(
 					chat.get_context(),
