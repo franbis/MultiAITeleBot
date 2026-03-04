@@ -2,6 +2,12 @@
 
 <br>
 
+### 4.0.0 (2026-03-04)
+
+* Improve text message streaming by maximizing delivery speed and using an adaptive chunk size to prevent hitting the Telegram API rate limits
+* Change `stream` to `streaming` in the bot chat settings
+* Enable `streaming` in the bot chat settings by default
+
 ### 3.2.0 (2026-01-04)
 
 * Fix boolean values not being set correctly when editing a configuration

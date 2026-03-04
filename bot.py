@@ -390,7 +390,7 @@ def bot_chat(msg, prompt):
 
 			try:
 				should_stream =\
-					config.get('chat.stream')\
+					config.get('chat.streaming')\
 					and not (\
 						msg.text.startswith('/a')\
 						# Telegram allows streaming in private chats only.

@@ -3,7 +3,7 @@
         "default_sys_msg": "You are just a friendly user in a chat.",
         "max_msgs": 5,
         "purge_days": 5,
-        "stream": false
+        "streaming": true
     },
     "prompt": {
         "audio": {

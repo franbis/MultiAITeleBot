@@ -89,8 +89,8 @@ class AIManager(ABC):
 
 			yield chunk
 
-
 	
+	@abstractmethod
 	def get_content(self, output_data, choice=0):
 		"""Extract the content of a output choice from either a
 		response or a stream chunk"""
