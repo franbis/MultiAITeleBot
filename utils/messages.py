@@ -1,9 +1,14 @@
+import time
+import math
 import traceback
 
 import telegramify_markdown
 
 from telebot import apihelper
 from telebot.apihelper import ApiTelegramException
+
+from constants.telegram import MAX_DRAFT_REQS_PER_MIN
+from constants.ai import CHARS_PER_TOKEN
 
 
 
@@ -80,35 +85,60 @@ def edit_chat_msg(bot, msg, text):
 	return bot.edit_message_text(text, msg.chat.id, msg.id, parse_mode='MarkdownV2')
 
 
-def reply_chat_msg_stream(bot, msg, chunks):
+def send_message_draft(bot, msg, text):
+	return apihelper._make_request(
+		bot.token,
+		'sendMessageDraft',
+		method='post',
+		params={
+			'chat_id': msg.chat.id,
+			'message_thread_id': msg.message_thread_id,
+			'draft_id': msg.id,
+			'text': text,
+			'parse_mode': 'MarkdownV2',
+			# Drafts do not support replies.
+			# 'reply_parameters': {
+			# 	'message_id': msg.id,
+			# 	'chat_id': msg.chat.id
+			# }
+		}
+	)
+
+
+def reply_chat_msg_stream(bot, msg, chunks, max_tokens):
 	full_text = ''
-	try:
-		for chunk in chunks:
-			full_text += chunk
-			apihelper._make_request(
-				bot.token,
-				'sendMessageDraft',
-				method='post',
-				params={
-					'chat_id': msg.chat.id,
-					'message_thread_id': msg.message_thread_id,
-					'draft_id': msg.id,
-					'text': process_text(full_text),
-					'parse_mode': 'MarkdownV2',
-					# Drafts do not support replies.
-					# 'reply_parameters': {
-					# 	'message_id': msg.id,
-					# 	'chat_id': msg.chat.id
-					# }
-				}
-			)
-	except ApiTelegramException as e:
-		if e.error_code == 429:
-			# A 'Too many requests' error was received, it's not
-			# worth waiting 4 seconds (suggested by the Telegram API)
-			# before retrying. So ignore it, send the text that was
-			# built till now and tell the user what happened.
-			full_text += '\n\n' + build_error_text('The "Too many requests" error was received from the Telegram API.')
+
+	def update_draft():
+		send_message_draft(bot, msg, process_text(full_text))
+
+	# Send the first chunk immediately to avoid having the user wait
+	full_text += next(chunks)
+	update_draft()
+
+	avg_tokens_per_chunk = max(1, len(full_text) // CHARS_PER_TOKEN)
+	# Predict the total chunks
+	total_chunks_pred = max_tokens / avg_tokens_per_chunk
+	max_chunks_per_req = math.ceil(total_chunks_pred / MAX_DRAFT_REQS_PER_MIN)
+
+	processed_chunks = 1
+	for chunk in chunks:
+		if not chunk:
+			continue
+
+		processed_chunks += 1
+
+		full_text += chunk
+		if processed_chunks >= max_chunks_per_req:
+			try:
+				update_draft()
+			except ApiTelegramException as e:
+				if e.error_code == 429:
+					# `Too many requests`
+					time.sleep(e.result_json['parameters']['retry_after'])
+				else:
+					raise e
+
+			processed_chunks = 0
 
 	return bot.reply_to(
 		msg,
